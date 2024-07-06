@@ -3,7 +3,7 @@ import { FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram, FaGithub } from 'rea
 
 export default function Footer() {
   return (
-    <footer className="bg-primary w-screen  relative  py-10 h-fit">
+    <footer className="bg-primary left-0 right-0 w-screen mx-0 relative  h-72 mb-0 pb-9">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 h-28">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="text-center md:text-left mb-4 md:mb-0">

@@ -7,7 +7,7 @@ import Footer from './Footer';
 
 const Home = () => {
   return (
-    <div className=' relative top-28  w-screen  welcome-section  '>
+    <div className=' relative top-28  w-screen overflow-hidden  '>
       <WelcomeSection />
       <HowItWorksSection />
       <TeamSection />

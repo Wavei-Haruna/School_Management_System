@@ -76,7 +76,7 @@ export default function TeacherSignUpForm() {
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-8 top-64 relative bg-white p-6 rounded-lg shadow-md">
+    <div className="max-w-lg mx-auto mt-8 top-32 relative bg-white p-6 rounded-lg shadow-md">
       <ToastContainer />
       <h2 className="text-2xl font-bold mb-4 text-center">Teacher Sign Up</h2>
       <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">

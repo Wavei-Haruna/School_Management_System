@@ -12,9 +12,9 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen flex flex-col  welcome-section px-6 ">
+        <div className=" welcome-section ">
           <Navbar />
-          <div className="flex-grow overflow-auto hide-scrollbar">
+          <div className=" hide-scrollbar">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/register" element={<TeacherSignupForm />} />

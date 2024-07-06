@@ -19,10 +19,10 @@ const HowItWorksSection = () => {
   ];
 
   return (
-    <section className="text-black  relative max-w-7xl mx-auto my-64">
+    <section className="text-black  relative max-w-6xl mx-6 md:mx-auto my-64">
       <h3 className="font-header text-2xl font-bold md:text-4xl w-fit py-2 text-white text-center mb-10 border-b-[4px] border-b-accent">How It Works</h3>
       <SlideInRight>
-      <m.div variants={cardContainer} initial={'hidden'} whileInView={'show'} className="container relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 overflow-hidden">
+      <m.div variants={cardContainer} initial={'hidden'} whileInView={'show'} className="container relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full">
         {items.map((item, index) => (
           
           <m.div key={index} variants={CardItems} className="relative bg-secondary rounded-xl shadow-md p-6 text-center transform transition-transform hover:scale-105 overflow-hidden">

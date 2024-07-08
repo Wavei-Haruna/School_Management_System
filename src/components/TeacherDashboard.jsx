@@ -34,7 +34,7 @@ const TeacherDashboard = () => {
   return (
     <div className="flex  relative w-screen top-24">
       {isSidebarOpen && <Sidebar setActiveTab={setActiveTab} activeTab={activeTab} />}
-      <div className={`main-content flex-1 ${isSidebarOpen ? 'ml-64' : 'ml-0'}`}>
+      <div className={`main-content flex-1 `}>
         <Topbar toggleSidebar={toggleSidebar} />
         <div className="p-6">
           {renderActiveTab()}

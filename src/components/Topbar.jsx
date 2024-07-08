@@ -5,7 +5,7 @@ import { FiMenu } from 'react-icons/fi'; // Example icon, adjust as needed
 
 const Topbar = ({ toggleSidebar }) => {
   return (
-    <div className="topbar bg-gray-900 text-white h-16 flex items-center justify-between px-6">
+    <div className="topbar  ml-72 bg-gray-900 text-white h-16 flex items-center justify-between px-6">
       <div className="flex items-center">
         <button
           className="mr-4 text-xl"

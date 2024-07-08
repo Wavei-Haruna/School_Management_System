@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { collection, addDoc, getDocs, doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../AuthContext';
-import { FaSpinner, FaEdit, FaTrash, FaPrint } from 'react-icons/fa';
+import { FaSpinner, FaEdit, FaTrash, FaPrint, FaFilePdf } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
 import calculateGradeAndRemarks from '../utils/calculateGradeAndRemarks';
 import { toast } from 'react-toastify';
 import AllStudents from './AllStudents';
+import { PDFViewer, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import Modal from 'react-modal'; // Import Modal from react-modal
 
 const Students = () => {
   const { currentUser } = useAuth();
@@ -16,32 +18,33 @@ const Students = () => {
   const [formData, setFormData] = useState({ name: '', grades: {} });
   const [loading, setLoading] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState(null);
-  const printRef = useRef();
-
-  const fetchStudents = async () => {
-    try {
-      const studentsRef = collection(db, `teachers/${currentUser.uid}/classes/${classId}/students`);
-      const querySnapshot = await getDocs(studentsRef);
-      const studentsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-      // Calculate total marks and sort students
-      studentsData.forEach(student => {
-        student.totalMarks = Object.values(student.grades).reduce((acc, { grade }) => acc + parseInt(grade), 0);
-      });
-      studentsData.sort((a, b) => b.totalMarks - a.totalMarks);
-      
-      // Assign class positions
-      studentsData.forEach((student, index) => {
-        student.position = index + 1;
-      });
-
-      setStudents(studentsData);
-    } catch (error) {
-      console.error('Error fetching students:', error);
-    }
-  };
+  const [selectedStudent, setSelectedStudent] = useState(null); // State to manage selected student for PDF view
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to manage modal open/close
 
   useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const studentsRef = collection(db, `teachers/${currentUser.uid}/classes/${classId}/students`);
+        const querySnapshot = await getDocs(studentsRef);
+        const studentsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Calculate total marks and sort students
+        studentsData.forEach(student => {
+          student.totalMarks = Object.values(student.grades).reduce((acc, { grade }) => acc + parseInt(grade), 0);
+        });
+        studentsData.sort((a, b) => b.totalMarks - a.totalMarks);
+
+        // Assign class positions
+        studentsData.forEach((student, index) => {
+          student.position = index + 1;
+        });
+
+        setStudents(studentsData);
+      } catch (error) {
+        console.error('Error fetching students:', error);
+      }
+    };
+
     const fetchClassInfo = async () => {
       try {
         if (currentUser && classId) {
@@ -61,8 +64,8 @@ const Students = () => {
     };
 
     if (currentUser && classId) {
-      fetchClassInfo();
       fetchStudents();
+      fetchClassInfo();
     }
   }, [currentUser, classId]);
 
@@ -139,13 +142,112 @@ const Students = () => {
     }
   };
 
-  const handlePrint = () => {
-    const printContent = printRef.current.innerHTML;
-    const originalContent = document.body.innerHTML;
-    document.body.innerHTML = printContent;
-    window.print();
-    document.body.innerHTML = originalContent;
+  const openPdfModal = (student) => {
+    setSelectedStudent(student);
+    setIsModalOpen(true);
   };
+
+  const closePdfModal = () => {
+    setIsModalOpen(false);
+    setSelectedStudent(null);
+  };
+
+  const StudentResultPDF = ({ student }) => (
+  <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Student Result</Text>
+        </View>
+        <View style={styles.section}>
+          <View style={styles.row}>
+            <View style={styles.cell}>
+              <Text style={styles.boldText}>Name:</Text>
+            </View>
+            <View style={styles.cell}>
+              <Text>{student.name}</Text>
+            </View>
+          </View>
+          <View style={styles.row}>
+            <View style={styles.cell}>
+              <Text style={styles.boldText}>Class:</Text>
+            </View>
+            <View style={styles.cell}>
+              <Text>{classInfo.className}</Text>
+            </View>
+          </View>
+          <View style={styles.row}>
+            <View style={styles.cell}>
+              <Text style={styles.boldText}>Position:</Text>
+            </View>
+            <View style={styles.cell}>
+              <Text>{student.position}</Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.section}>
+          <View style={styles.row}>
+            <View style={styles.cell}>
+              <Text style={styles.boldText}>Grades:</Text>
+            </View>
+          </View>
+          {classInfo.courses.map(course => (
+            <View key={course} style={styles.row}>
+              <View style={styles.cell}>
+                <Text>{course}:</Text>
+              </View>
+              <View style={styles.cell}>
+                <Text>{student.grades[course]?.grade}</Text>
+              </View>
+              <View style={styles.cell}>
+                <Text>({student.grades[course]?.letterGrade} - {student.grades[course]?.remark})</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+        <View style={styles.section}>
+          <View style={styles.row}>
+            <View style={styles.cell}>
+              <Text style={styles.boldText}>Total Marks:</Text>
+            </View>
+            <View style={styles.cell}>
+              <Text>{student.totalMarks}</Text>
+            </View>
+          </View>
+        </View>
+      </Page>
+    </Document>
+  );
+
+const styles = StyleSheet.create({
+    page: {
+      flexDirection: 'column',
+      padding: 20,
+    },
+    header: {
+      paddingBottom: 20,
+      textAlign: 'center',
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+    },
+    section: {
+      marginBottom: 10,
+    },
+    row: {
+      flexDirection: 'row',
+      borderBottomWidth: 1,
+      borderBottomColor: '#000',
+      paddingBottom: 5,
+    },
+    cell: {
+      padding: 5,
+      flexGrow: 1,
+    },
+    boldText: {
+      fontWeight: 'bold',
+    },
+  });
 
   return (
     <div className="p-4">
@@ -189,47 +291,64 @@ const Students = () => {
             </button>
           </form>
           <div className="mt-6">
-            <div ref={printRef}>
-              <table className="w-full text-left table-auto">
-                <thead>
-                  <tr className="bg-gray-800 text-white">
-                    <th className="p-4">Position</th>
-                    <th className="p-4">Name</th>
-                    {classInfo.courses && classInfo.courses.map(course => (
-                      <th key={course} className="p-4">{course}</th>
-                    ))}
-                    <th className="p-4">Total Marks</th>
-                    <th className="p-4">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.map((student, index) => (
-                    <tr key={student.id} className="bg-gray-700 text-white">
-                      <td className="p-4">{student.position}</td>
-                      <td className="p-4">{student.name}</td>
-                      {classInfo.courses && classInfo.courses.map(course => (
-                        <td key={course} className="p-4">
-                          {student.grades[course]?.grade} ({student.grades[course]?.letterGrade} - {student.grades[course]?.remark})
-                        </td>
-                      ))}
-                      <td className="p-4">{student.totalMarks}</td>
-                      <td className="p-4 flex space-x-4">
-                        <button onClick={() => handleEditStudent(student)} className="bg-yellow-500 text-white p-2 rounded-full shadow hover:bg-yellow-600 transition duration-300">
-                          <FaEdit />
-                        </button>
-                        <button onClick={() => handleDeleteStudent(student.id)} className="bg-red-500 text-white p-2 rounded-full shadow hover:bg-red-600 transition duration-300">
-                          <FaTrash />
-                        </button>
-                        <button onClick={handlePrint} className="bg-green-500 text-white p-2 rounded-full shadow hover:bg-green-600 transition duration-300">
-                          <FaPrint />
-                        </button>
-                      </td>
-                    </tr>
+            <table className="w-full text-left table-auto overflow-x-scroll ">
+              <thead>
+                <tr className="bg-gray-800 text-white">
+                  <th className="p-4">Position</th>
+                  <th className="p-4">Name</th>
+                  {classInfo.courses && classInfo.courses.map(course => (
+                    <th key={course} className="p-4">{course}</th>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                  <th className="p-4">Total Marks</th>
+                  <th className="p-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {students.map((student, index) => (
+                  <tr key={student.id} className="bg-gray-700 text-white">
+                    <td className="p-4">{student.position}</td>
+                    <td className="p-4">{student.name}</td>
+                    {classInfo.courses && classInfo.courses.map(course => (
+                      <td key={course} className="p-4">
+                        {student.grades[course]?.grade} ({student.grades[course]?.letterGrade} - {student.grades[course]?.remark})
+                      </td>
+                    ))}
+                    <td className="p-4">{student.totalMarks}</td>
+                    <td className="p-4 flex space-x-4">
+                      <button onClick={() => handleEditStudent(student)} className="bg-yellow-500 text-white p-2 rounded-full shadow hover:bg-yellow-600 transition duration-300">
+                        <FaEdit />
+                      </button>
+                      <button onClick={() => handleDeleteStudent(student.id)} className="bg-red-500 text-white p-2 rounded-full shadow hover:bg-red-600 transition duration-300">
+                        <FaTrash />
+                      </button>
+                      <button onClick={() => openPdfModal(student)} className="bg-blue-500 text-white p-2 rounded-full shadow hover:bg-blue-600 transition duration-300">
+                        <FaFilePdf />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+          {/* Modal for viewing PDF */}
+          <Modal
+            isOpen={isModalOpen}
+            onRequestClose={closePdfModal}
+            contentLabel="Student Result PDF"
+            className="modal absolute top-[15vh] left-36 w-[70vw]"
+            overlayClassName="overlay"
+          >
+            <div className="flex justify-end mb-4">
+              <button onClick={closePdfModal} className="bg-red-500 text-white p-2 rounded-full shadow hover:bg-red-600 transition duration-300">
+                Close
+              </button>
+            </div>
+            {selectedStudent && (
+              <PDFViewer width="100%" height="600">
+                <StudentResultPDF student={selectedStudent} />
+              </PDFViewer>
+            )}
+          </Modal>
         </>
       ) : (
         <AllStudents />

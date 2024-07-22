@@ -54,7 +54,7 @@ function Navbar() {
             Home
           </Link>
           <Link
-            to="/about"
+            to="/about-us"
             className="block text-white px-3 py-2 rounded-md text-base font-medium hover:bg-secondary hover:text-white"
           >
             About

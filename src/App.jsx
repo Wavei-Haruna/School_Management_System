@@ -7,6 +7,8 @@ import TeacherDashboard from './components/TeacherDashboard';
 import TeacherLoginForm from './components/TeacherLoginForm';
 import { AuthProvider } from './AuthContext';
 import Students from './components/Students';
+import AboutUs from './pages/AboutUs';
+import ContactUs from './pages/Contact';
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
           <div className=" hide-scrollbar">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/about-us" element={<AboutUs />} />
+              <Route path="/contact" element={<ContactUs />} />
               <Route path="/register" element={<TeacherSignupForm />} />
               <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
               <Route path="/login" element={<TeacherLoginForm />} />

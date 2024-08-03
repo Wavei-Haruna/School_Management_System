@@ -4,6 +4,7 @@ import WelcomeSection from './WelcomeSection';
 import HowItWorksSection from './HowItWorksSection';
 import TeamSection from './TeamSection';
 import Footer from './Footer';
+import AdminDashboard from './admin/AdminDashboard';
 
 const Home = () => {
   return (
@@ -11,6 +12,7 @@ const Home = () => {
       <WelcomeSection />
       <HowItWorksSection />
       <TeamSection />
+      <AdminDashboard/>
       <Footer />
     </div>
   );

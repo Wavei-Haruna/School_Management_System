@@ -35,8 +35,34 @@ const StudentTableModal = ({ classData, onClose }) => {
     setLoading(true);
     try {
       for (const student of students) {
+        const studentMarks = student.marks || {};
+        const coursesArray = classData?.courses || [];
+
+        const totalMarks = coursesArray.reduce((total, course) => total + (studentMarks[course] || 0), 0);
+        const averageMarks = coursesArray.length ? totalMarks / coursesArray.length : 0;
+
+        // Check if any mark is non-zero
+        const hasNonZeroMark = coursesArray.some(course => studentMarks[course] > 0);
+
+        let grade;
+        if (hasNonZeroMark) {
+          if (averageMarks >= 90) grade = 'A+';
+          else if (averageMarks >= 80) grade = 'A';
+          else if (averageMarks >= 70) grade = 'B';
+          else if (averageMarks >= 60) grade = 'C';
+          else grade = 'F';
+        } else {
+          grade = 'N/A'; // Default grade if no marks are entered
+        }
+
         const studentRef = doc(db, `classes/${classData.id}/students/${student.id}`);
-        await updateDoc(studentRef, { marks: student.marks });
+        await updateDoc(studentRef, {
+          marks: student.marks,
+          totalMarks,
+          averageMarks,
+          grade,
+          rank: student.rank,
+        });
       }
       toast.success('Marks saved successfully');
       onClose();

@@ -4,8 +4,8 @@ import Topbar from './Topbar';
 import Teachers from './Teachers';
 import Students from './Students';
 import Classes from './Classes';
-import ReportCards from './ReportCards';
 import Settings from './Settings';
+import FetchStudentData from './FetchStudentData';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('teachers');
@@ -24,7 +24,7 @@ const AdminDashboard = () => {
       case 'classes':
         return <Classes />;
       case 'reportCards':
-        return <ReportCards />;
+        return <FetchStudentData />;
       case 'settings':
         return <Settings />;
       default:

@@ -95,6 +95,12 @@ function Navbar() {
               >
                 Register
               </Link>
+              <Link
+                to="/admin-login"
+                className="block text-white px-3 py-2 rounded-md  border-accent border text-base font-medium hover:bg-secondary hover:text-white"
+              >
+                Admin Login
+              </Link>
             </>
           )}
         </div>

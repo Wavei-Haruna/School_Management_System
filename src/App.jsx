@@ -6,15 +6,17 @@ import TeacherSignupForm from './components/TeacherSignUpForm';
 import TeacherDashboard from './components/TeacherDashboard';
 import TeacherLoginForm from './components/TeacherLoginForm';
 import { AuthProvider } from './AuthContext';
-import Students from './components/Students';
+import Students from './pages/admin/Students';
 import AboutUs from './pages/AboutUs';
 import ContactUs from './pages/Contact';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminLogin from './pages/admin/AdminLoginForm';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className=" welcome-section ">
+        <div className=" welcome-section h-screen ">
           <Navbar />
           <div className=" hide-scrollbar">
             <Routes>
@@ -23,7 +25,9 @@ function App() {
               <Route path="/contact" element={<ContactUs />} />
               <Route path="/register" element={<TeacherSignupForm />} />
               <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+              <Route path="/admin-dashboard" element={<AdminDashboard />} />
               <Route path="/login" element={<TeacherLoginForm />} />
+              <Route path="/admin-login" element={<AdminLogin/>} />
               <Route path="/class/:classId/students" element={<Students /> }/>
 
               {/* Add more routes as needed */}

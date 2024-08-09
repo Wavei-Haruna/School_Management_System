@@ -84,22 +84,22 @@ const Teachers = () => {
   };
 
   return (
-    <div className="p-4">
-      <h2 className="font-header text-2xl font-bold md:text-4xl w-fit py-2 text-white text-center mb-10 border-b-[4px] border-b-accent">Teachers</h2>
+    <div className="p-4 h-screen overflow-scroll">
+      <h2 className="font-header text-2xl font-bold  md:text-4xl w-fit py-2 text-white text-center mb-10 border-b-[4px] border-b-accent">Teachers</h2>
       <div className="mt-6">
-        <h3 className="text-xl font-bold mb-4 font-serif text-white font-body">Existing Teachers</h3>
+        <h3 className="text-xl font-bold mb-4 font-serif text-white font-body">Existing Teachers ({teachers?.length})</h3>
         <ul className="grid md:grid-cols-3 gap-10">
           {teachers.map((teacher) => (
             <li key={teacher.id} className="mb-2 p-4 rounded bg-primary shadow flex justify-between items-center">
               <div>
                 <h4 className="text-lg font-bold text-accent">{teacher.name}</h4>
                 <p className="text-white">Email: {teacher.email}</p>
-                <p className="text-white font-body my-3">Subjects: {teacher.subjects.join(', ')}</p>
+                {/* <p className="text-white font-body my-3">Subjects: {teacher.classes.courses?.join(', ')}</p> */}
               </div>
               <div className="flex flex-col space-y-4">
-                <button onClick={() => handleEditTeacher(teacher)} className="bg-yellow-500 text-white p-2 rounded-full shadow hover:bg-yellow-600 transition duration-300">
+                {/* <button onClick={() => handleEditTeacher(teacher)} className="bg-yellow-500 text-white p-2 rounded-full shadow hover:bg-yellow-600 transition duration-300">
                   <FaEdit />
-                </button>
+                </button> */}
                 <button onClick={() => handleDeleteTeacher(teacher.id)} className="bg-red-500 text-white p-2 rounded-full shadow hover:bg-red-600 transition duration-300">
                   <FaTrash />
                 </button>

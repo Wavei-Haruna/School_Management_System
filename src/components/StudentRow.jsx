@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 const StudentRow = ({ student, courses, onMarkChange }) => {

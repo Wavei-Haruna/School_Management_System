@@ -68,7 +68,19 @@ const StudentTableModal = ({ classData, onClose }) => {
   };
 
   const calculateRanks = (studentsList) => {
-    const rankedStudents = [...studentsList]
+    const rankedStudents = studentsList
+      .map((student) => {
+        const studentMarks = student.marks || {};
+        const coursesArray = classData?.courses || [];
+
+        // Calculate total marks
+        const totalMarks = coursesArray.reduce((total, course) => {
+          const courseMarks = studentMarks[course] || { exercise: 0, midsem: 0, exam: 0 };
+          return total + calculateTotalMarks(courseMarks);
+        }, 0);
+
+        return { ...student, totalMarks };
+      })
       .sort((a, b) => b.totalMarks - a.totalMarks)
       .map((student, index) => ({ ...student, rank: index + 1 }));
 
@@ -85,30 +97,16 @@ const StudentTableModal = ({ classData, onClose }) => {
         const coursesArray = classData?.courses || [];
 
         // Calculate total marks and average
-        const totalMarks = coursesArray.reduce((total, course) => {
-          const courseMarks = studentMarks[course] || { exercise: 0, midsem: 0, exam: 0 };
-          return total + calculateTotalMarks(courseMarks);
-        }, 0);
-
+        const totalMarks = student.totalMarks;
         const averageMarks = coursesArray.length ? totalMarks / coursesArray.length : 0;
-
-        // Check if any mark is non-zero
-        const hasNonZeroMark = coursesArray.some(course => {
-          const courseMarks = studentMarks[course] || { exercise: 0, midsem: 0, exam: 0 };
-          return Object.values(courseMarks).some(mark => mark > 0);
-        });
 
         // Determine grade
         let grade;
-        if (hasNonZeroMark) {
-          if (averageMarks >= 90) grade = 'A+';
-          else if (averageMarks >= 80) grade = 'A';
-          else if (averageMarks >= 70) grade = 'B';
-          else if (averageMarks >= 60) grade = 'C';
-          else grade = 'F';
-        } else {
-          grade = 'N/A'; // Default grade if no marks are entered
-        }
+        if (averageMarks >= 90) grade = 'A+';
+        else if (averageMarks >= 80) grade = 'A';
+        else if (averageMarks >= 70) grade = 'B';
+        else if (averageMarks >= 60) grade = 'C';
+        else grade = 'F';
 
         const studentRef = doc(db, `classes/${classData.id}/students/${student.id}`);
         await updateDoc(studentRef, {

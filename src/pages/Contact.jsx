@@ -71,7 +71,7 @@ const ContactUs = () => {
           Alternatively, you can reach us via email at: <a href="mailto:Selasibanini@gmail.com" className="text-primary hover:underline">Selasibanini@gmail.com</a>
         </p>
       </div>
-      <AdminDashboard/>
+     
     </motion.div>
   );
 };

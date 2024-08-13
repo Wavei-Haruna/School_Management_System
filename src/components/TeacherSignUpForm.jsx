@@ -37,12 +37,8 @@ export default function TeacherSignUpForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { name, email, password, confirmPassword, schoolName, subject, town, phoneNumber, agreeTerms } = formData;
+    const { name, email, password, town, phoneNumber, agreeTerms } = formData;
 
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match.');
-      return;
-    }
 
     if (!agreeTerms) {
       toast.error('Please agree to the terms and conditions.');
@@ -57,8 +53,6 @@ export default function TeacherSignUpForm() {
       await setDoc(doc(db, 'teachers', user.uid), {
         name,
         email,
-        schoolName,
-        subject,
         town,
         phoneNumber,
         role: 'teacher',
@@ -138,52 +132,11 @@ export default function TeacherSignUpForm() {
         </div>
 
         {/* Confirm Password */}
-        <div className="col-span-2">
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-            Confirm Password
-          </label>
-          <input
-            type={formData.showPassword ? 'text' : 'password'}
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleInputChange}
-            required
-            className="mt-1 block w-full border-gray-300 border py-2 px-2 focus:outline-none rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm pr-10"
-          />
-        </div>
+        
 
         {/* School Name */}
-        <div className="col-span-2">
-          <label htmlFor="schoolName" className="block text-sm font-medium text-gray-700">
-            School Name
-          </label>
-          <input
-            type="text"
-            id="schoolName"
-            name="schoolName"
-            value={formData.schoolName}
-            onChange={handleInputChange}
-            required
-            className="mt-1 block w-full border-gray-300 border py-2 px-2 focus:outline-none rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm"
-          />
-        </div>
-
-        {/* Subject */}
-        <div className="col-span-2">
-          <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
-            Subject Teaching
-          </label>
-          <input
-            type="text"
-            id="subject"
-            name="subject"
-            value={formData.subject}
-            onChange={handleInputChange}
-            required
-            className="mt-1 block w-full border-gray-300 border py-2 px-2 focus:outline-none rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm"
-          />
-        </div>
+       
+       
 
         {/* Town */}
         <div className="col-span-2">

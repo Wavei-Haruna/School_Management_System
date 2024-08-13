@@ -6,7 +6,8 @@ import Topbar from './Topbar';
 import Students from './Students';
 import Grades from './Grades';
 import Settings from './Settings';
-import Classes from './Classes';
+
+import AssignedClasses from './AssignedClasses';
 
 const TeacherDashboard = () => {
   const [activeTab, setActiveTab] = useState('students');
@@ -23,7 +24,7 @@ const TeacherDashboard = () => {
       case 'grades':
         return <Grades />;
       case 'classes':
-        return <Classes />;
+        return <AssignedClasses/>;
       case 'settings':
         return <Settings />;
       default:
@@ -36,7 +37,7 @@ const TeacherDashboard = () => {
       {isSidebarOpen && <Sidebar setActiveTab={setActiveTab} activeTab={activeTab} />}
       <div className={`main-content flex-1 `}>
         <Topbar toggleSidebar={toggleSidebar} />
-        <div className="p-6">
+        <div className="p-6 mx-auto container">
           {renderActiveTab()}
         </div>
       </div>

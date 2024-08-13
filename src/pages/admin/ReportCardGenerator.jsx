@@ -1,4 +1,4 @@
-// src/components/ReportCardGenerator.js
+// src/components/ReportCardGenerator.jsx
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, PDFDownloadLink } from '@react-pdf/renderer';
 
@@ -75,31 +75,50 @@ const ReportCard = ({ students, studClass }) => (
           <View style={styles.row}>
             <View style={styles.column}>
               <Text style={styles.bold}>Name:</Text>
-              <Text style={styles.text}>{student.name}</Text>
+              <Text style={styles.text}>{student.name || 'N/A'}</Text>
             </View>
             <View style={styles.columnLast}>
               <Text style={styles.bold}>Index Number:</Text>
-              <Text style={styles.text}>{student.indexNumber}</Text>
+              <Text style={styles.text}>{student.indexNumber || 'N/A'}</Text>
             </View>
+            <View style={styles.columnLast}>
+              <Text style={styles.bold}>Year:</Text>
+              <Text style={styles.text}>{student.year || 'N/A'}</Text>
+            </View>
+            
           </View>
           <View style={styles.row}>
             <View style={styles.column}>
               <Text style={styles.bold}>Class:</Text>
-              <Text style={styles.text}>{studClass}</Text>
+              <Text style={styles.text}>{studClass || 'N/A'}</Text>
             </View>
             <View style={styles.columnLast}>
               <Text style={styles.bold}>Grade:</Text>
-              <Text style={styles.text}>{student.grade}</Text>
+              <Text style={styles.text}>{student.grade || 'N/A'}</Text>
+              
+            </View>
+            <View style={styles.columnLast}>
+              <Text style={styles.bold}>Semester:</Text>
+              <Text style={styles.text}>{student.semester || 'N/A'}</Text>
             </View>
           </View>
           <View style={styles.marks}>
             <Text style={styles.bold}>Marks:</Text>
             <View style={styles.marksList}>
-              {Object.entries(student.marks).map(([course, mark]) => (
-                <Text key={course}>
-                  {course}: {mark}
-                </Text>
-              ))}
+              {student.marks ? (
+                Object.entries(student.marks).map(([subject, details]) => (
+                  <View key={subject} style={{ marginBottom: 10 }}>
+                    <Text style={styles.bold}>{subject}:</Text>
+                    {Object.entries(details).map(([type, mark]) => (
+                      <Text key={type}>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}: {mark || 'N/A'}
+                      </Text>
+                    ))}
+                  </View>
+                ))
+              ) : (
+                <Text>No marks available</Text>
+              )}
             </View>
           </View>
         </View>

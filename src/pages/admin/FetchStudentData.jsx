@@ -1,3 +1,4 @@
+// src/components/FetchStudentData.jsx
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebase';
@@ -8,60 +9,56 @@ const FetchStudentData = () => {
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [students, setStudents] = useState([]);
-  const [loading, setLoading] = useState(true); // Initialize loading state
-  const [selectedStudents, setSelectedStudents] = useState([]); // To keep track of selected students
-  const [selectedClassName, setSelectedClassName] = useState(''); // To store the selected class name
+  const [loading, setLoading] = useState(true);
+  const [selectedStudents, setSelectedStudents] = useState([]);
+  const [selectedClsName, setSelectedClsName] = useState('');
 
-  // Fetch classes from the database
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        setLoading(true); // Set loading to true when starting fetch
+        setLoading(true);
         const q = collection(db, 'classes');
         const querySnapshot = await getDocs(q);
         const classesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setClasses(classesData);
         if (classesData.length > 0) {
-          setSelectedClass(classesData[0].id); // Set the first class as default selection
-          setSelectedClassName(classesData[0].className); // Set the first class name as default
+          setSelectedClass(classesData[0].id);
+          setSelectedClsName(classesData[0].className);
         }
       } catch (error) {
         console.error('Error fetching classes:', error);
       } finally {
-        setLoading(false); // Set loading to false after fetch is done
+        setLoading(false);
       }
     };
 
     fetchClasses();
   }, []);
 
-  // Fetch students from the selected class
   useEffect(() => {
     if (selectedClass) {
       const fetchStudents = async () => {
         try {
-          setLoading(true); // Set loading to true when starting fetch
+          setLoading(true);
           const q = collection(db, `classes/${selectedClass}/students`);
           const querySnapshot = await getDocs(q);
           const studentsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           setStudents(studentsData);
-
-          // Update the selected class name
-          const selectedClassData = classes.find(cls => cls.id === selectedClass);
-          setSelectedClassName(selectedClassData ? selectedClassData.className : '');
+          console.log(students)
         } catch (error) {
           console.error('Error fetching students:', error);
         } finally {
-          setLoading(false); // Set loading to false after fetch is done
+          setLoading(false);
         }
       };
 
       fetchStudents();
     }
-  }, [selectedClass, classes]);
+  }, [selectedClass]);
 
   const handleStudentSelection = (studentId) => {
     setSelectedStudents(prevState => {
+      console.log(studentId)
       if (prevState.includes(studentId)) {
         return prevState.filter(id => id !== studentId);
       }
@@ -72,7 +69,7 @@ const FetchStudentData = () => {
   const handleGenerateReport = () => {
     const selectedData = students.filter(student => selectedStudents.includes(student.id));
     if (selectedData.length > 0) {
-      // Update the ReportCardGenerator to handle selectedData
+      // Handle ReportCardGenerator here
     } else {
       alert('Please select at least one student');
     }
@@ -81,11 +78,11 @@ const FetchStudentData = () => {
   return (
     <div className="p-6">
       {loading ? (
-        <Loader /> // Display loader while fetching data
+        <Loader />
       ) : (
         <>
           <div className="mb-4 container mx-auto">
-            <label htmlFor="class-select text-gray-700" className="block text-lg font-semibold mb-2">
+            <label htmlFor="class-select" className="block text-lg font-semibold mb-2">
               Select Class:
             </label>
             <select
@@ -130,8 +127,8 @@ const FetchStudentData = () => {
           </button>
           {selectedStudents.length > 0 && (
             <ReportCardGenerator 
-              students={students.filter(student => selectedStudents.includes(student.id))} 
-              studClass={selectedClassName} 
+              students={students.filter(student => selectedStudents.includes(student.id))}
+              studClass={selectedClsName || null}
             />
           )}
         </>

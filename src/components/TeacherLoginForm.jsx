@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Assuming you are using React Router for navigation
+import { useNavigate } from 'react-router-dom'; 
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { toast } from 'react-toastify'; // Ensure you have ToastContainer imported at a higher level
+import { toast } from 'react-toastify'; 
 import { FaSpinner } from 'react-icons/fa';
+import { useAuth } from '../AuthContext'; // Import the useAuth hook
 
 const TeacherLogin = () => {
   const [formData, setFormData] = useState({
@@ -10,9 +11,9 @@ const TeacherLogin = () => {
     password: '',
   });
 
-  const [loading, setLoading] = useState(false)
-
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { setCurrentUser } = useAuth(); // Access the setCurrentUser function from context
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -23,20 +24,20 @@ const TeacherLogin = () => {
   };
 
   const handleLogin = async (e) => {
-
     e.preventDefault();
-    setLoading(true)
+    setLoading(true);
 
     const { email, password } = formData;
 
     try {
       const auth = getAuth();
-      await signInWithEmailAndPassword(auth, email, password);
-      setLoading(false)
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      setCurrentUser(userCredential.user); // Set the current user in context
+      setLoading(false);
       toast.success('Login successful');
-      // Navigate to Teacher Dashboard or any other page after successful login
-      navigate('/teacher-dashboard'); // Replace with your actual route
+      navigate('/teacher-dashboard'); 
     } catch (error) {
+      setLoading(false);
       toast.error('Failed to log in. Please check your credentials.');
     }
   };

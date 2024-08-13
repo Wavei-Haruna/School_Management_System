@@ -16,7 +16,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className=" welcome-section h-screen ">
+        <div className=" welcome-section h-screen overflow-scroll">
           <Navbar />
           <div className=" hide-scrollbar">
             <Routes>

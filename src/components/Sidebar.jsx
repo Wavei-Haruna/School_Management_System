@@ -13,7 +13,7 @@ const Sidebar = ({ setActiveTab, activeTab }) => {
         <h1 className="text-2xl font-bold">Teacher Dashboard</h1>
       </div>
       <ul className="mt-6">
-        <li
+        {/* <li
           className={`px-4 py-3 cursor-pointer hover:bg-primary ${
             activeTab === 'students' && 'bg-gray-700'
           }`}
@@ -21,8 +21,8 @@ const Sidebar = ({ setActiveTab, activeTab }) => {
         >
           <FiUsers className="inline mr-2" />
           Students
-        </li>
-        <li
+        </li> */}
+        {/* <li
           className={`px-4 py-3 cursor-pointer hover:bg-primary ${
             activeTab === 'grades' && 'bg-gray-700'
           }`}
@@ -30,7 +30,7 @@ const Sidebar = ({ setActiveTab, activeTab }) => {
         >
           <FiBook className="inline mr-2" />
           Grades
-        </li>
+        </li> */}
         <li
           className={`px-4 py-3 cursor-pointer hover:bg-primary ${
             activeTab === 'classes' && 'bg-gray-700'

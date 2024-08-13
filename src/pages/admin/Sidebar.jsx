@@ -26,7 +26,7 @@ const Sidebar = ({ setActiveTab, activeTab, isSidebarOpen }) => {
           <MdPerson className="inline mr-2" />
           Teachers
         </li>
-        <li
+        {/* <li
           className={`px-4 py-3 cursor-pointer hover:bg-primary ${
             activeTab === 'students' && 'bg-gray-700'
           }`}
@@ -34,7 +34,7 @@ const Sidebar = ({ setActiveTab, activeTab, isSidebarOpen }) => {
         >
           <FiUsers className="inline mr-2" />
           Students
-        </li>
+        </li> */}
         <li
           className={`px-4 py-3 cursor-pointer hover:bg-primary ${
             activeTab === 'classes' && 'bg-gray-700'

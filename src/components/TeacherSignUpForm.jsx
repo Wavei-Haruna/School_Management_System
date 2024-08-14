@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+  sendPasswordResetEmail,
+} from 'firebase/auth';
 import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore'; // Use setDoc instead of addDoc
 import { db, auth } from '../../firebase';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
@@ -39,7 +44,6 @@ export default function TeacherSignUpForm() {
 
     const { name, email, password, town, phoneNumber, agreeTerms } = formData;
 
-
     if (!agreeTerms) {
       toast.error('Please agree to the terms and conditions.');
       return;
@@ -59,12 +63,50 @@ export default function TeacherSignUpForm() {
         timeStamp: serverTimestamp(),
         uid: user.uid,
       });
-  
+
       toast.success('Account created successfully!');
-      navigate("/teacher-dashboard")
-      // Redirect or perform further actions here
+      navigate("/teacher-dashboard");
     } catch (error) {
       console.error('Error signing up:', error.message);
+      toast.error(error.message);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // Add user details to Firestore
+      await setDoc(doc(db, 'teachers', user.uid), {
+        name: user.displayName,
+        email: user.email,
+        town: '',
+        phoneNumber: user.phoneNumber || '',
+        role: 'teacher',
+        timeStamp: serverTimestamp(),
+        uid: user.uid,
+      });
+
+      toast.success('Signed in with Google successfully!');
+      navigate("/teacher-dashboard");
+    } catch (error) {
+      console.error('Error with Google sign-in:', error.message);
+      toast.error(error.message);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    if (!formData.email) {
+      toast.error('Please enter your email to reset the password.');
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, formData.email);
+      toast.success('Password reset email sent!');
+    } catch (error) {
+      console.error('Error sending password reset email:', error.message);
       toast.error(error.message);
     }
   };
@@ -131,13 +173,6 @@ export default function TeacherSignUpForm() {
           </div>
         </div>
 
-        {/* Confirm Password */}
-        
-
-        {/* School Name */}
-       
-       
-
         {/* Town */}
         <div className="col-span-2">
           <label htmlFor="town" className="block text-sm font-medium text-gray-700">
@@ -198,6 +233,26 @@ export default function TeacherSignUpForm() {
           </button>
         </div>
       </form>
+
+      {/* Google Sign-In Button */}
+      <div className="col-span-2 mt-4">
+        <button
+          onClick={handleGoogleSignIn}
+          className="w-full py-2 px-4 bg-red-500 text-white rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+        >
+          Sign Up with Google
+        </button>
+      </div>
+
+      {/* Reset Password Link */}
+      <div className="col-span-2 mt-4 text-center">
+        <button
+          onClick={handlePasswordReset}
+          className="text-primary hover:underline focus:outline-none"
+        >
+          Forgot Password? Reset here
+        </button>
+      </div>
     </div>
   );
 }

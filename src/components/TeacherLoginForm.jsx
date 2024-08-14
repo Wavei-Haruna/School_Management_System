@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
-import { toast } from 'react-toastify'; 
+import { useNavigate } from 'react-router-dom';
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { toast } from 'react-toastify';
 import { FaSpinner } from 'react-icons/fa';
-import { useAuth } from '../AuthContext'; // Import the useAuth hook
+import { useAuth } from '../AuthContext';
 
 const TeacherLogin = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { setCurrentUser } = useAuth(); // Access the setCurrentUser function from context
@@ -35,10 +34,41 @@ const TeacherLogin = () => {
       setCurrentUser(userCredential.user); // Set the current user in context
       setLoading(false);
       toast.success('Login successful');
-      navigate('/teacher-dashboard'); 
+      navigate('/teacher-dashboard');
     } catch (error) {
       setLoading(false);
       toast.error('Failed to log in. Please check your credentials.');
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!formData.email) {
+      toast.error('Please enter your email to reset password');
+      return;
+    }
+
+    try {
+      const auth = getAuth();
+      await sendPasswordResetEmail(auth, formData.email);
+      toast.success('Password reset email sent. Please check your inbox.');
+    } catch (error) {
+      toast.error('Failed to send password reset email. Please try again.');
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    try {
+      const auth = getAuth();
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      setCurrentUser(userCredential.user); // Set the current user in context
+      setLoading(false);
+      toast.success('Login with Google successful');
+      navigate('/teacher-dashboard');
+    } catch (error) {
+      setLoading(false);
+      toast.error('Failed to log in with Google.');
     }
   };
 
@@ -77,17 +107,42 @@ const TeacherLogin = () => {
             className="mt-1 block w-full border-gray-300 border py-2 px-2 focus:outline-none rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm"
           />
         </div>
-      
+
+        {/* Forgot Password Link */}
+
+        <div className="flex items-center justify-between">
+        <div className="text-right">
+          <button
+            type="button"
+            onClick={handleForgotPassword}
+            className="text-sm text-primary hover:underline"
+          >
+            Forgot Password?
+          </button>
+        </div>
+
         {/* Submit Button */}
         <div className="text-right">
           <button
             type="submit"
             className="bg-primary text-white py-2 px-4 rounded-md shadow-sm hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
           >
-            {loading ? <FaSpinner className="animate-spin" />: 'Login'} 
+            {loading ? <FaSpinner className="animate-spin" /> : 'Login'}
           </button>
         </div>
+        </div>
       </form>
+
+      {/* Google Login Button */}
+      <div className="mt-4 text-center">
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          className="bg-red-500 text-white py-2 px-4 rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+        >
+          {loading ? <FaSpinner className="animate-spin" /> : 'Login with Google'}
+        </button>
+      </div>
     </div>
   );
 };

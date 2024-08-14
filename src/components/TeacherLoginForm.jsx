@@ -115,7 +115,7 @@ const TeacherLogin = () => {
           <button
             type="button"
             onClick={handleForgotPassword}
-            className="text-sm text-primary hover:underline"
+            className="text-sm text-primary font-semibold hover:underline"
           >
             Forgot Password?
           </button>

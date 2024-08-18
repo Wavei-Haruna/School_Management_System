@@ -1,4 +1,5 @@
 import React from 'react';
+import Swal from 'sweetalert2';
 
 const StudentRow = ({ student, courses, onMarkChange }) => {
   const studentMarks = student?.marks || {};
@@ -24,6 +25,18 @@ const StudentRow = ({ student, courses, onMarkChange }) => {
            calculateWeightedMark(marks.exam, 'End of Sem');
   };
 
+  const handleInputChange = (course, type, value) => {
+    if (value > 100) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Invalid Input',
+        text: 'Marks cannot be more than 100!',
+      });
+      return;
+    }
+    onMarkChange(course, type, value);
+  };
+
   const totalMarks = coursesArray.reduce((total, course) => {
     const courseMarks = studentMarks[course] || { exercise: 0, midsem: 0, exam: 0 };
     return total + calculateTotalMarks(courseMarks);
@@ -47,23 +60,26 @@ const StudentRow = ({ student, courses, onMarkChange }) => {
           <input
             type="number"
             value={studentMarks[course]?.exercise || ''}
-            onChange={(e) => onMarkChange(course, 'exercise', parseInt(e.target.value, 10) || 0)}
+            onChange={(e) => handleInputChange(course, 'exercise', parseInt(e.target.value, 10) || 0)}
             className="w-16 p-1 border rounded-full shadow-sm focus:outline-none"
             placeholder="Exercise"
+            max="100"
           />
           <input
             type="number"
             value={studentMarks[course]?.midsem || ''}
-            onChange={(e) => onMarkChange(course, 'midsem', parseInt(e.target.value, 10) || 0)}
+            onChange={(e) => handleInputChange(course, 'midsem', parseInt(e.target.value, 10) || 0)}
             className="w-16 p-1 border rounded-full shadow-sm focus:outline-none"
             placeholder="MidSem"
+            max="100"
           />
           <input
             type="number"
             value={studentMarks[course]?.exam || ''}
-            onChange={(e) => onMarkChange(course, 'exam', parseInt(e.target.value, 10) || 0)}
+            onChange={(e) => handleInputChange(course, 'exam', parseInt(e.target.value, 10) || 0)}
             className="w-16 p-1 border rounded-full shadow-sm focus:outline-none"
             placeholder="End of Sem"
+            max="100"
           />
         </td>
       ))}

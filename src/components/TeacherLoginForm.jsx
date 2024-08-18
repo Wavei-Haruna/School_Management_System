@@ -13,8 +13,8 @@ const TeacherLogin = () => {
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { setCurrentUser } = useAuth(); // Access the setCurrentUser function from context
-  const db = getFirestore(); // Initialize Firestore
+  const { setCurrentUser } = useAuth();
+  const db = getFirestore();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -34,24 +34,23 @@ const TeacherLogin = () => {
       const auth = getAuth();
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      setCurrentUser(user); // Set the current user in context
+      setCurrentUser(user);
 
-      // Fetch the user's role from Firestore
+      // Check both the users and teachers collections
       const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const teacherDoc = await getDoc(doc(db, 'teachers', user.uid));
+
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        const role = userData.role;
-
-        // Redirect based on role
-        if (role === 'admin') {
+        if (userData.role === 'admin') {
           toast.success('Admin login successful');
           navigate('/admin-dashboard');
-        } else if (role === 'teacher') {
-          toast.success('Teacher login successful');
-          navigate('/teacher-dashboard');
         } else {
           toast.error('Access denied. Invalid role.');
         }
+      } else if (teacherDoc.exists()) {
+        toast.success('Teacher login successful');
+        navigate('/teacher-dashboard');
       } else {
         toast.error('User data not found.');
       }
@@ -64,7 +63,7 @@ const TeacherLogin = () => {
 
   const handleForgotPassword = async () => {
     if (!formData.email) {
-      toast.error('Please enter your email to reset password');
+      toast.error('Please enter your email to reset the password.');
       return;
     }
 
@@ -83,24 +82,23 @@ const TeacherLogin = () => {
       const auth = getAuth();
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
-      setCurrentUser(userCredential.user); // Set the current user in context
+      setCurrentUser(userCredential.user);
 
-      // Fetch the user's role from Firestore
+      // Check both the users and teachers collections
       const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+      const teacherDoc = await getDoc(doc(db, 'teachers', userCredential.user.uid));
+
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        const role = userData.role;
-
-        // Redirect based on role
-        if (role === 'admin') {
+        if (userData.role === 'admin') {
           toast.success('Login with Google successful (Admin)');
           navigate('/admin-dashboard');
-        } else if (role === 'teacher') {
-          toast.success('Login with Google successful (Teacher)');
-          navigate('/teacher-dashboard');
         } else {
           toast.error('Access denied. Invalid role.');
         }
+      } else if (teacherDoc.exists()) {
+        toast.success('Login with Google successful (Teacher)');
+        navigate('/teacher-dashboard');
       } else {
         toast.error('User data not found.');
       }
@@ -113,7 +111,7 @@ const TeacherLogin = () => {
 
   return (
     <div className="max-w-md mx-auto mt-8 bg-white p-6 relative top-64 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4 text-center">Teacher Login</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
       <form onSubmit={handleLogin} className="grid grid-cols-1 gap-4">
         {/* Email */}
         <div>

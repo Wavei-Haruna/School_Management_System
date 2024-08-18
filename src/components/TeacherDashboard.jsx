@@ -10,7 +10,7 @@ import Settings from './Settings';
 import AssignedClasses from './AssignedClasses';
 
 const TeacherDashboard = () => {
-  const [activeTab, setActiveTab] = useState('students');
+  const [activeTab, setActiveTab] = useState('classes');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const toggleSidebar = () => {
@@ -19,10 +19,8 @@ const TeacherDashboard = () => {
 
   const renderActiveTab = () => {
     switch (activeTab) {
-      case 'students':
-        return <Students />;
-      case 'grades':
-        return <Grades />;
+     
+      
       case 'classes':
         return <AssignedClasses/>;
       case 'settings':

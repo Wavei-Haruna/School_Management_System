@@ -11,9 +11,11 @@ const Classes = () => {
   const [formData, setFormData] = useState({ id: '', className: '', courses: [], numberOfStudents: 0, teacherId: '' });
   const [teachers, setTeachers] = useState([]);
   const [students, setStudents] = useState([{ name: '', indexNumber: '' }]);
+  const [originalStudents, setOriginalStudents] = useState([]); // Track original students
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const fetchClasses = async () => {
     try {
@@ -42,6 +44,11 @@ const Classes = () => {
     fetchTeachers();
   }, []);
 
+  const hasDuplicateIndexNumbers = () => {
+    const indexNumbers = students.map(student => student.indexNumber);
+    return new Set(indexNumbers).size !== indexNumbers.length;
+  };
+
   const handleAddOrUpdateClass = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -49,7 +56,7 @@ const Classes = () => {
       const newClass = {
         className: formData.className,
         courses: formData.courses,
-        numberOfStudents: students.length,
+        numberOfStudents: students.length, // Update the number of students
         teacherId: formData.teacherId,
       };
 
@@ -65,8 +72,11 @@ const Classes = () => {
         fetchClasses();
         toast.success('Class added successfully');
       }
+
+      // Reset the form after success
       setFormData({ id: '', className: '', courses: [], numberOfStudents: 0, teacherId: '' });
       setStudents([{ name: '', indexNumber: '' }]);
+      setOriginalStudents([]);
     } catch (error) {
       console.error('Error adding or updating class:', error);
       toast.error('Failed to add or update class');
@@ -84,14 +94,31 @@ const Classes = () => {
   const updateStudents = async (classId) => {
     const studentDocs = await getDocs(collection(db, `classes/${classId}/students`));
     const existingStudents = studentDocs.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    for (const student of existingStudents) {
+
+    // Identify students to be deleted
+    const studentsToRemove = originalStudents.filter(
+      originalStudent => !students.some(student => student.indexNumber === originalStudent.indexNumber)
+    );
+
+    // Remove students from Firestore
+    for (const student of studentsToRemove) {
       const studentRef = doc(db, `classes/${classId}/students/${student.id}`);
       await deleteDoc(studentRef);
     }
-    await addStudents(classId);
+
+    // Add or update students in Firestore
+    for (const student of students) {
+      const existingStudent = existingStudents.find(s => s.indexNumber === student.indexNumber);
+      if (existingStudent) {
+        const studentRef = doc(db, `classes/${classId}/students/${existingStudent.id}`);
+        await updateDoc(studentRef, student);
+      } else {
+        await addDoc(collection(db, `classes/${classId}/students`), student);
+      }
+    }
   };
 
-  const handleEditClass = (cls) => {
+  const handleEditClass = async (cls) => {
     setFormData({
       id: cls.id,
       className: cls.className,
@@ -99,7 +126,11 @@ const Classes = () => {
       numberOfStudents: cls.numberOfStudents,
       teacherId: cls.teacherId,
     });
-    setStudents(cls.students || [{ name: '', indexNumber: '' }]);
+
+    const studentDocs = await getDocs(collection(db, `classes/${cls.id}/students`));
+    const fetchedStudents = studentDocs.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setStudents(fetchedStudents);
+    setOriginalStudents(fetchedStudents); // Store original students
   };
 
   const handleDeleteClass = async (classId) => {
@@ -124,8 +155,9 @@ const Classes = () => {
   };
 
   return (
-    <div className="p-4 ">
-      <h2 className="font-header text-2xl font-bold md:text-4xl w-fit py-2 text-white text-center mb-10 border-b-[4px] border-b-accent">Classes</h2>
+    <div className="p-4 container mx-auto">
+      <h2 className="font-header  text-2xl font-bold md:text-4xl w-fit py-2 text-white text-center mb-10 border-b-[4px] border-b-accent">Classes</h2>
+      <div className="grid grid-cols-2 gap-x-10">
       <ClassList classes={classes} onEdit={handleEditClass} onDelete={handleDeleteClass} onOpenModal={handleOpenModal} />
       <ClassForm
         formData={formData}
@@ -135,7 +167,11 @@ const Classes = () => {
         teachers={teachers}
         loading={loading}
         handleAddOrUpdateClass={handleAddOrUpdateClass}
+        errorMessage={errorMessage}
+        setErrorMessage={setErrorMessage}
+        hasDuplicateIndexNumbers={hasDuplicateIndexNumbers}
       />
+      </div>
       {showModal && (
         <StudentTableModal classData={selectedClass} onClose={handleCloseModal} />
       )}

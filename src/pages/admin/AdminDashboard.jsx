@@ -33,11 +33,11 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex relative w-full h-screen mx-auto bg-gray-400 text-secondary top-24">
+    <div className="flex fixed  w-full h-screen mx-auto bg-gray-400 text-secondary top-24 overflow-x-scroll">
       <Sidebar setActiveTab={setActiveTab} activeTab={activeTab} isSidebarOpen={isSidebarOpen} />
       <div className={`main-content flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-2' : 'ml-0'}`}>
         <Topbar toggleSidebar={toggleSidebar} />
-        <div className="p-6">{renderActiveTab()}</div>
+        <div className="p-6 ">{renderActiveTab()}</div>
       </div>
     </div>
   );

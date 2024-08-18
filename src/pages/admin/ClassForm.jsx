@@ -1,7 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
-const ClassForm = ({ formData, setFormData, students, setStudents, teachers, loading, handleAddOrUpdateClass }) => {
-
+const ClassForm = ({
+  formData,
+  setFormData,
+  students,
+  setStudents,
+  teachers,
+  loading,
+  handleAddOrUpdateClass,
+  errorMessage,
+  setErrorMessage,
+  hasDuplicateIndexNumbers
+}) => {
   useEffect(() => {
     console.log("Form Data: ", formData);
     console.log("Students: ", students);
@@ -54,120 +64,167 @@ const ClassForm = ({ formData, setFormData, students, setStudents, teachers, loa
     setStudents(updatedStudents);
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Check for duplicate index numbers before submitting
+    if (hasDuplicateIndexNumbers()) {
+      setErrorMessage('Duplicate index numbers found! Each student must have a unique index number.');
+      return;
+    }
+
+    // Clear any existing error message if validation passes
+    setErrorMessage('');
+
+    // Pass the event object to handleAddOrUpdateClass
+    handleAddOrUpdateClass(e);
+  };
+
   return (
-    <div className="mt-8">
-      <h3 className="text-xl font-bold mb-4 font-serif text-white font-body">Add/Edit Class</h3>
-      <form onSubmit={handleAddOrUpdateClass} className="max-w-3xl mx-auto">
-        <div className="mb-4">
-          <label className="block text-white mb-2" htmlFor="className">Class Name</label>
-          <input
-            type="text"
-            id="className"
-            name="className"
-            value={formData.className}
-            onChange={handleInputChange}
-            className="w-full p-3 text-sm border rounded-full shadow-sm focus:outline-none focus:border-accent"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-white mb-2" htmlFor="teacherId">Class Teacher</label>
-          <select
-            id="teacherId"
-            name="teacherId"
-            value={formData.teacherId}
-            onChange={handleInputChange}
-            className="w-full p-3 text-sm border rounded-full shadow-sm focus:outline-none focus:border-accent"
-            required
-          >
-            <option value="" disabled>Select Teacher</option>
-            {teachers.map((teacher) => (
-              <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
-            ))}
-          </select>
-        </div>
-        <h4 className="text-lg font-bold mb-2 text-white font-body">Courses</h4>
-        {formData.courses.map((course, index) => (
-          <div key={index} className="mb-4 p-3 border rounded-lg bg-primary">
-            <div className="mb-2">
-              <label className="block text-white mb-1" htmlFor={`course${index}`}>Course</label>
-              <input
-                type="text"
-                id={`course${index}`}
-                value={course}
-                onChange={(e) => handleCourseChange(index, e.target.value)}
-                className="w-full p-2 text-sm border rounded-full shadow-sm focus:outline-none focus:border-accent"
-                required
-              />
-            </div>
-            {formData.courses.length > 1 && (
-              <button
-                type="button"
-                onClick={() => handleRemoveCourseField(index)}
-                className="text-red-500 text-sm mt-2"
-              >
-                Remove
-              </button>
-            )}
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={handleAddCourseField}
-          className="text-white bg-green-500 hover:bg-green-600 py-2 px-4 rounded-full shadow-sm focus:outline-none transition duration-300 mb-4"
-        >
-          Add Course
-        </button>
-        <h4 className="text-lg font-bold mb-2 text-white font-body">Students</h4>
-        {students.map((student, index) => (
-          <div key={index} className="mb-4 p-3 border rounded-lg bg-primary">
-            <div className="mb-2">
-              <label className="block text-white mb-1" htmlFor={`studentName${index}`}>Name</label>
-              <input
-                type="text"
-                id={`studentName${index}`}
-                value={student.name}
-                onChange={(e) => handleStudentChange(index, 'name', e.target.value)}
-                className="w-full p-2 text-sm border rounded-full shadow-sm focus:outline-none focus:border-accent"
-                required
-              />
-            </div>
-            <div className="mb-2">
-              <label className="block text-white mb-1" htmlFor={`indexNumber${index}`}>Index Number</label>
-              <input
-                type="text"
-                id={`indexNumber${index}`}
-                value={student.indexNumber}
-                onChange={(e) => handleStudentChange(index, 'indexNumber', e.target.value)}
-                className="w-full p-2 text-sm border rounded-full shadow-sm focus:outline-none focus:border-accent"
-                required
-              />
-            </div>
-            {students.length > 1 && (
-              <button
-                type="button"
-                onClick={() => handleRemoveStudentField(index)}
-                className="text-red-500 text-sm mt-2"
-              >
-                Remove
-              </button>
-            )}
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={handleAddStudentField}
-          className="text-white bg-green-500 hover:bg-green-600 py-2 px-4 rounded-full shadow-sm focus:outline-none transition duration-300"
-        >
-          Add Student
-        </button>
-        <button
-          type="submit"
-          disabled={loading}
-          className="mt-4 w-full text-white bg-blue-500 hover:bg-blue-600 py-2 px-4 rounded-full shadow-sm focus:outline-none transition duration-300"
-        >
-          {loading ? 'Saving...' : 'Save Class'}
-        </button>
+    <div className="mt-2  ">
+      <h3 className="text-xl font-bold mb-4 font-serif text-white font-body ">Add/Edit Class</h3>
+      {errorMessage && <div className="text-red-500 mb-4">{errorMessage}</div>}
+      <form onSubmit={handleSubmit} className=" mx-auto  w-full relative mb-12">
+        <table className="w-full bg-white border-collapse rounded-lg">
+          <tbody>
+            <tr>
+              <td className="p-2 border-b">
+                <label className="block text-gray-600 font-semibold">Class Name</label>
+              </td>
+              <td className="p-2 border-b">
+                <input
+                  type="text"
+                  name="className"
+                  value={formData.className}
+                  onChange={handleInputChange}
+                  className="w-full p-2 text-sm border rounded-md shadow-sm focus:outline-none focus:border-accent"
+                  required
+                />
+              </td>
+            </tr>
+            <tr>
+              <td className="p-2 border-b">
+                <label className="block text-gray-600 font-semibold">Class Teacher</label>
+              </td>
+              <td className="p-2 border-b">
+                <select
+                  name="teacherId"
+                  value={formData.teacherId}
+                  onChange={handleInputChange}
+                  className="w-full p-2 text-sm border rounded-md shadow-sm focus:outline-none focus:border-accent"
+                  required
+                >
+                  <option value="">Select a teacher</option>
+                  {teachers.map(teacher => (
+                    <option key={teacher.id} value={teacher.id}>{teacher.name}</option>
+                  ))}
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td className="p-2 border-b">
+                <label className="block text-gray-600 font-semibold">Courses</label>
+              </td>
+              <td className="p-2 border-b">
+                {formData.courses.map((course, index) => (
+                  <div key={index} className="mb-2">
+                    <input
+                      type="text"
+                      value={course}
+                      onChange={(e) => handleCourseChange(index, e.target.value)}
+                      className="w-full p-2 text-sm border rounded-md shadow-sm focus:outline-none focus:border-accent mb-2"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveCourseField(index)}
+                      className="text-red-500 text-sm"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={handleAddCourseField}
+                  className="mt-2 p-2 bg-accent text-white text-sm rounded-md"
+                >
+                  Add Course
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td className="p-2 border-b">
+                <label className="block text-gray-600 font-semibold">Students</label>
+              </td>
+              <td className="p-2 border-b">
+                <table className="min-w-full bg-white border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="p-2 border-b">Name</th>
+                      <th className="p-2 border-b">Index Number</th>
+                      <th className="p-2 border-b">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {students.map((student, index) => (
+                      <tr key={index}>
+                        <td className="p-2 border-b">
+                          <input
+                            type="text"
+                            placeholder="Student Name"
+                            value={student.name}
+                            onChange={(e) => handleStudentChange(index, 'name', e.target.value)}
+                            className="w-full p-2 text-sm border rounded-md shadow-sm focus:outline-none focus:border-accent"
+                            required
+                          />
+                        </td>
+                        <td className="p-2 border-b">
+                          <input
+                            type="text"
+                            placeholder="Index Number"
+                            value={student.indexNumber}
+                            onChange={(e) => handleStudentChange(index, 'indexNumber', e.target.value)}
+                            className="w-full p-2 text-sm border rounded-md shadow-sm focus:outline-none focus:border-accent"
+                            required
+                          />
+                        </td>
+                        <td className="p-2 border-b text-center">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveStudentField(index)}
+                            className="text-red-500 text-sm"
+                          >
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <button
+                  type="button"
+                  onClick={handleAddStudentField}
+                  className="mt-4 p-2 bg-accent text-white text-sm  rounded-md"
+                >
+                  Add Student
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td className="p-2 border-b"></td>
+              <td className="p-2 border-b">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-1/2 text-center p-2 mx-auto bg-accent text-white text-lg rounded-full shadow-sm hover:bg-accent-dark transition duration-200"
+                >
+                  {loading ? 'Saving...' : 'Save Class'}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </form>
     </div>
   );

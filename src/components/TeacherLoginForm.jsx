@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { toast } from 'react-toastify';
 import { FaSpinner } from 'react-icons/fa';
 import { useAuth } from '../AuthContext';
@@ -13,6 +14,7 @@ const TeacherLogin = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { setCurrentUser } = useAuth(); // Access the setCurrentUser function from context
+  const db = getFirestore(); // Initialize Firestore
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -31,13 +33,32 @@ const TeacherLogin = () => {
     try {
       const auth = getAuth();
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      setCurrentUser(userCredential.user); // Set the current user in context
-      setLoading(false);
-      toast.success('Login successful');
-      navigate('/teacher-dashboard');
+      const user = userCredential.user;
+      setCurrentUser(user); // Set the current user in context
+
+      // Fetch the user's role from Firestore
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const role = userData.role;
+
+        // Redirect based on role
+        if (role === 'admin') {
+          toast.success('Admin login successful');
+          navigate('/admin-dashboard');
+        } else if (role === 'teacher') {
+          toast.success('Teacher login successful');
+          navigate('/teacher-dashboard');
+        } else {
+          toast.error('Access denied. Invalid role.');
+        }
+      } else {
+        toast.error('User data not found.');
+      }
     } catch (error) {
-      setLoading(false);
       toast.error('Failed to log in. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,12 +84,30 @@ const TeacherLogin = () => {
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
       setCurrentUser(userCredential.user); // Set the current user in context
-      setLoading(false);
-      toast.success('Login with Google successful');
-      navigate('/teacher-dashboard');
+
+      // Fetch the user's role from Firestore
+      const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const role = userData.role;
+
+        // Redirect based on role
+        if (role === 'admin') {
+          toast.success('Login with Google successful (Admin)');
+          navigate('/admin-dashboard');
+        } else if (role === 'teacher') {
+          toast.success('Login with Google successful (Teacher)');
+          navigate('/teacher-dashboard');
+        } else {
+          toast.error('Access denied. Invalid role.');
+        }
+      } else {
+        toast.error('User data not found.');
+      }
     } catch (error) {
-      setLoading(false);
       toast.error('Failed to log in with Google.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -108,10 +147,7 @@ const TeacherLogin = () => {
           />
         </div>
 
-        {/* Forgot Password Link */}
-
         <div className="flex items-center justify-between">
-        <div className="text-right">
           <button
             type="button"
             onClick={handleForgotPassword}
@@ -119,10 +155,6 @@ const TeacherLogin = () => {
           >
             Forgot Password?
           </button>
-        </div>
-
-        {/* Submit Button */}
-        <div className="text-right">
           <button
             type="submit"
             className="bg-primary text-white py-2 px-4 rounded-md shadow-sm hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
@@ -130,15 +162,13 @@ const TeacherLogin = () => {
             {loading ? <FaSpinner className="animate-spin" /> : 'Login'}
           </button>
         </div>
-        </div>
       </form>
 
-      {/* Google Login Button */}
       <div className="mt-4 text-center">
         <button
           type="button"
           onClick={handleGoogleLogin}
-          className="bg-red-500 text-white py-2 px-4  rounded-full shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          className="bg-red-500 text-white py-2 px-4 rounded-full shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
         >
           {loading ? <FaSpinner className="animate-spin" /> : 'Login with Google'}
         </button>

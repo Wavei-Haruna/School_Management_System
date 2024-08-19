@@ -45,11 +45,15 @@ const StudentRow = ({ student, courses, onMarkChange }) => {
   const averageMarks = coursesArray.length ? totalMarks / coursesArray.length : 0;
 
   let grade;
-  if (averageMarks >= 90) grade = 'A+';
-  else if (averageMarks >= 80) grade = 'A';
-  else if (averageMarks >= 70) grade = 'B';
-  else if (averageMarks >= 60) grade = 'C';
-  else grade = 'F';
+if (averageMarks >= 80 && averageMarks <= 100) grade = 'A1';
+else if (averageMarks >= 75 && averageMarks <= 79) grade = 'B2';
+else if (averageMarks >= 70 && averageMarks <= 74) grade = 'B3';
+else if (averageMarks >= 65 && averageMarks <= 69) grade = 'C4';
+else if (averageMarks >= 60 && averageMarks <= 64) grade = 'C5';
+else if (averageMarks >= 55 && averageMarks <= 59) grade = 'C6';
+else if (averageMarks >= 50 && averageMarks <= 54) grade = 'D7';
+else if (averageMarks >= 45 && averageMarks <= 49) grade = 'E8';
+else grade = 'F9';
 
   return (
     <tr>
